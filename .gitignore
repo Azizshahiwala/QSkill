@@ -1,0 +1,13 @@
+.venv
+
+Google_gen_ai_tool/__pycache__/
+Google_gen_ai_tool/vscode
+Google_gen_ai_tool/tempCodeRunnerFile.py
+
+Matrix_operation_tool/__pycache__/
+Matrix_operation_tool/vscode
+Matrix_operation_tool/tempCodeRunnerFile.py
+
+Sentiment_analysis/__pycache__/
+Sentiment_analysis/vscode 
+Sentiment_analysis/tempCodeRunnerFile.py 
