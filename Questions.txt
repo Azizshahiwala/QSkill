@@ -1,0 +1,5 @@
+Create a "Matrix Operations Tool" using Python and the NumPy library. The application should allow users to input matrices and perform operations like addition, subtraction, multiplication, transpose, and determinant calculation. Include an interactive interface to display results in a structured format.
+
+Develop a web application using Flask or Django that performs sentiment analysis on user entered text. The application should classify the text as positive, negative, or neutral using TextBlob and display polarity and subjectivity scores.
+
+Integrate Google Gemini in Python using the Google Generative AI API. Implement a system that can remember conversation history, including previous user messages and responses. Additionally, enable real-time data retrieval by integrating the Google Search API so the model can answer real-time queries, such as the current price of Bitcoin or the weather in Mumbai.
