@@ -1,9 +1,9 @@
 .venv
 
-Google_gen_ai_tool/__pycache__
-Google_gen_ai_tool/vscode
-Google_gen_ai_tool/tempCodeRunnerFile.py
-Google_gen_ai_tool/.env
+VoiceActivatedPersonalAssistant/__pycache__
+VoiceActivatedPersonalAssistant/vscode
+VoiceActivatedPersonalAssistant/tempCodeRunnerFile.py
+VoiceActivatedPersonalAssistant/.env
 
 Matrix_operation_tool/__pycache__
 Matrix_operation_tool/vscode
