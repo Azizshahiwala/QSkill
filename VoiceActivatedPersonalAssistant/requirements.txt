@@ -2,3 +2,4 @@ SpeechRecognition[audio]
 pyttsx3
 requests
 schedule
+dotenv
