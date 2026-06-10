@@ -1,4 +1,5 @@
 .venv
+*/venv
 
 VoiceActivatedPersonalAssistant/__pycache__
 VoiceActivatedPersonalAssistant/.vscode
@@ -6,11 +7,11 @@ VoiceActivatedPersonalAssistant/tempCodeRunnerFile.py
 VoiceActivatedPersonalAssistant/.env
 
 Matrix_operation_tool/__pycache__
-Matrix_operation_tool/vscode
+Matrix_operation_tool/.vscode
 Matrix_operation_tool/tempCodeRunnerFile.py
 Matrix_operation_tool/.env
 
 Sentiment_analysis/__pycache__
-Sentiment_analysis/vscode 
+Sentiment_analysis/.vscode 
 Sentiment_analysis/tempCodeRunnerFile.py 
 Sentiment_analysis/.env
