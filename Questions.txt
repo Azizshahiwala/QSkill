@@ -2,4 +2,4 @@ Create a "Matrix Operations Tool" using Python and the NumPy library. The applic
 
 Develop a web application using Flask or Django that performs sentiment analysis on user entered text. The application should classify the text as positive, negative, or neutral using TextBlob and display polarity and subjectivity scores.
 
-Integrate Google Gemini in Python using the Google Generative AI API. Implement a system that can remember conversation history, including previous user messages and responses. Additionally, enable real-time data retrieval by integrating the Google Search API so the model can answer real-time queries, such as the current price of Bitcoin or the weather in Mumbai.
+Voice-Activated Personal Assistant: Build a personal assistant that performs tasks like setting reminders, checking the weather, and reading the news. Integrate with speech recognition and text-to-speech libraries to create an interactive, voice-activated experience.
