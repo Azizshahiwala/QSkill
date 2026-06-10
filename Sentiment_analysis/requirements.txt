@@ -1,4 +1,0 @@
-textblob
-flask
-textblob[download_corpora]
-dotenv
