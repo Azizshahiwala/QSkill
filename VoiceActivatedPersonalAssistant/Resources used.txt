@@ -1,0 +1,6 @@
+Weather api: https://www.weatherapi.com/
+News api: https://newsapi.org/
+Text to speech: pyttsx3
+Speech to Text: SpeechRecognition[audio]
+For schedule setting: schedule
+Used venv 3.12
