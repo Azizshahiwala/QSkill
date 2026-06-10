@@ -1,0 +1,5 @@
+pipwin
+pyaudio
+pyttsx3
+requests
+schedule
