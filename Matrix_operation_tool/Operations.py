@@ -9,8 +9,7 @@ class Operations:
         self.header = None
         self.Frames = []
         self.boundaries = dict([])
-        self.OutputArea = Frame(self.maincontent,background="green")
-
+        
     def focusIn(self,widget,placeholder):
         widget.delete(0,END) if widget.get().lower()==placeholder.lower() else False
             
@@ -263,7 +262,8 @@ class Operations:
         self.MultiplicationFrame = Frame(maincontent,background="green")
         self.DeterminantFrame = Frame(maincontent,background="green")
         self.TransposeFrame = Frame(maincontent,background="green")
-
+        self.OutputArea = Frame(maincontent, background="green")
+        
         self.Frames = [self.AdditionFrame,
                         self.SubtractionFrame,
                         self.MultiplicationFrame,
