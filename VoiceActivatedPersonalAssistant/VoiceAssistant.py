@@ -220,7 +220,7 @@ class VoiceAssistant:
             thr = threading.Thread(target=self.setReminder, kwargs={"task":taskname,"delay":seconds})
             thr.start()
             
-        elif 'exit' in cleaned_message:
+        elif 'exit' in cleaned_message or 'quit' in cleaned_message:
             self.speakMessage("Exitting... Thankyou for using!")
             exit(0)
         else:
