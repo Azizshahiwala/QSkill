@@ -32,7 +32,6 @@ class VoiceAssistant:
                 dotenv.load_dotenv(self.path)
                 keys = self.APIS.keys()
                 for key in keys:
-                    print("key:",key)
                     self.APIS[key]=os.getenv(key)
                 print("Dictionary:",self.APIS)
 
@@ -40,7 +39,7 @@ class VoiceAssistant:
                 raise MicrophoneNotFoundError
             else:
                 for index,mic in enumerate(sr.Microphone.list_microphone_names()):
-                    print(f"Microphone available: {mic} for Microphone(device_index={index})")
+                    print(f"Devices available: {mic} for Microphone(device_index={index})")
                     self.mic_dict[index] = mic
             
         except EnvNotFoundError:
@@ -56,24 +55,40 @@ class VoiceAssistant:
         try:
             processed_num = 0
             cleaned = " ".join(self.processText(captured_speech))
-            print("cleaned",cleaned)
+            print("Data inputted:",cleaned)
             processed_num = float(w2n.word_to_num(cleaned))
             return processed_num
         except ValueError as e:
             processed_num = re.findall(r"\d+",captured_speech)
+            if len(processed_num) > 0:
+                print("Processed: ",processed_num[0])
+                processed_num = float(processed_num[0])
+            
             return processed_num
         except Exception as e:
             print(e)
         
     def setReminder(self,task,delay=60):
+        def speakMessage(msg):
+            engine.say(msg)
+            engine.startLoop(False)
+            while engine.isBusy():
+                engine.iterate()
+            engine.endLoop()
+            print("queue completed...")
+             
+        
         print("Task:",task)
         print("delay:",delay)
-        minute = 60//delay
-        self.speakMessage(f"Reminder set for {task}! I will remind you in {minute} minutes.")
-        time.sleep(delay)
-        self.speakMessage(f"Timer finished.")
-        print("Task completed")
+        engine = pyttsx3.init()
+        engine.setProperty('rate', 150)
         
+        minute = delay/60
+        speakMessage(f"Reminder set for {task}! I will remind you in {minute} minutes.")
+        time.sleep(delay)
+        speakMessage(f"Your timer for {minute} minutes ended!")
+        print("Task completed")
+        engine.stop()
     
     def changeMicrophone(self):
         if keyboard.is_pressed('m'):
@@ -145,7 +160,9 @@ class VoiceAssistant:
     def speakMessage(self, msg):
         try:
             self.engine.say(msg)
-            self.engine.startLoop()
+            self.engine.startLoop(False)
+            while self.engine.isBusy():
+                self.engine.iterate()
             self.engine.endLoop()
         except Exception as e:
             print(e)
@@ -178,28 +195,31 @@ class VoiceAssistant:
         elif 'reminder' in cleaned_message:
             seconds=0
             count=0
+            
             self.speakMessage("Ok, Speak task name.")
+            print("Say your task name...")
             taskname = self.listenMessage()
+            
 
-            self.speakMessage("Now speak number of minutes to remind you. Eg: one, three, two hundred, etc.")
+            self.speakMessage("Now speak number of minutes to remind you. Example: 1 minute")
+            print("Now speak number of minutes to remind you. Example: 1 minute")
             captured_speech = self.listenMessage()
-
+            
             count = assistant.processToNumber(captured_speech)
 
             if not count:
                 return
             
             print("Captured number: ",count)
-            if count or count >= 1 :
-                seconds = count*60
+            if count and count >= 1 :
+                seconds = int(count * 60)
             else:
                 seconds = 60
                 self.speakMessage("Could not understand minute count. timer will be set to 1 minute.")
 
             thr = threading.Thread(target=self.setReminder, kwargs={"task":taskname,"delay":seconds})
             thr.start()
-            thr.join()
-            self.speakMessage(f"Your timer for {count} minutes ended!")
+            
         elif 'exit' in cleaned_message:
             self.speakMessage("Exitting... Thankyou for using!")
             exit(0)
