@@ -1,6 +1,8 @@
 import os,dotenv,re
 from word2number import w2n 
-import threading,time
+import time
+from multiprocessing import Process
+from threading import Thread
 import keyboard
 import pyttsx3 
 import requests
@@ -51,6 +53,16 @@ class VoiceAssistant:
                 print("An env file has been created. Make sure to set configurations.")
         except MicrophoneNotFoundError:
             pass
+
+    def keywordPressed(self):
+        if keyboard.is_pressed('m'):
+                print("-------")
+                print("To change microphone, input device_index")
+                device_index = int(input("device_index="))
+                if assistant.mic_dict[device_index]:
+                    print(f"Switching to {assistant.mic_dict[device_index]}")
+                    print("-------")
+                    sr.Microphone(device_index=device_index)
     def processToNumber(self,captured_speech:str):
         try:
             processed_num = 0
@@ -67,39 +79,29 @@ class VoiceAssistant:
             return processed_num
         except Exception as e:
             print(e)
-        
-    def setReminder(self,task,delay=60):
+    @staticmethod    
+    def setReminder(task,delay=60):
+
+        import pyttsx3,time
         def speakMessage(msg):
             engine.say(msg)
             engine.startLoop(False)
             while engine.isBusy():
                 engine.iterate()
             engine.endLoop()
-            print("queue completed...")
-             
-        
-        print("Task:",task)
-        print("delay:",delay)
+
+        print("Task name:",task)
         engine = pyttsx3.init()
         engine.setProperty('rate', 150)
         
         minute = delay/60
+        print("delay in minutes:",minute)
         speakMessage(f"Reminder set for {task}! I will remind you in {minute} minutes.")
         time.sleep(delay)
         speakMessage(f"Your timer for {minute} minutes ended!")
-        print("Task completed")
+        print("Task completed.")
         engine.stop()
-    
-    def changeMicrophone(self):
-        if keyboard.is_pressed('m'):
-                print("-------")
-                print("To change microphone, input device_index")
-                device_index = int(input("device_index="))
-                if assistant.mic_dict[device_index]:
-                    print(f"Switching to {assistant.mic_dict[device_index]}")
-                    print("-------")
-                    sr.Microphone(device_index=device_index)
-                
+         
     def readNews(self,parameter="India",startDate=datetime.strftime(datetime.now()- timedelta(days=1),'%Y-%m-%d')):
         '''
         This function will read at least 1 article.
@@ -170,9 +172,9 @@ class VoiceAssistant:
         try:
             self.recognizer = sr.Recognizer()
             with sr.Microphone() as mic:
-                self.recognizer.adjust_for_ambient_noise(mic,duration=0.2)
+                self.recognizer.adjust_for_ambient_noise(mic,duration=1)
                 audio = self.recognizer.listen(mic)
-                text = self.recognizer.recognize_whisper(audio,model="base",language="english")
+                text = self.recognizer.recognize_whisper(audio,model="small",language="english")
                 return text
         except sr.UnknownValueError:
             raise 
@@ -199,27 +201,23 @@ class VoiceAssistant:
             self.speakMessage("Ok, Speak task name.")
             print("Say your task name...")
             taskname = self.listenMessage()
-            
 
             self.speakMessage("Now speak number of minutes to remind you. Example: 1 minute")
             print("Now speak number of minutes to remind you. Example: 1 minute")
             captured_speech = self.listenMessage()
             
             count = assistant.processToNumber(captured_speech)
-
-            if not count:
-                return
             
-            print("Captured number: ",count)
             if count and count >= 1 :
                 seconds = int(count * 60)
             else:
                 seconds = 60
                 self.speakMessage("Could not understand minute count. timer will be set to 1 minute.")
 
-            thr = threading.Thread(target=self.setReminder, kwargs={"task":taskname,"delay":seconds})
-            thr.start()
-            
+            reminder_process = Process(target=self.setReminder,kwargs={"task":taskname,"delay":seconds})
+            reminder_process.start()
+            reminder_process.join()
+
         elif 'exit' in cleaned_message or 'quit' in cleaned_message:
             self.speakMessage("Exitting... Thankyou for using!")
             exit(0)
@@ -232,9 +230,17 @@ if __name__ == "__main__":
     assistant.speakMessage("A) Set a reminder. B) Check current weather. C) Check current news.")
     rate = assistant.engine.getProperty('rate')
     
+    try:
+        keypress_thread = Thread(target=assistant.keywordPressed)
+        keypress_thread.start()
+    except IOError as e:
+        keypress_thread = Thread(target=assistant.keywordPressed)
+        keypress_thread.start()
+        keypress_thread.join()
     print("Speaking at rate: ",rate)
     assistant.engine.setProperty('rate',150)
     print("Listening...")
+    
     while True:
         try:
             captured_speech = assistant.listenMessage()
