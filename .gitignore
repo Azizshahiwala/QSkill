@@ -1,6 +1,6 @@
 .venv
 */venv
-
+App.py
 VoiceActivatedPersonalAssistant/__pycache__
 VoiceActivatedPersonalAssistant/.vscode
 VoiceActivatedPersonalAssistant/tempCodeRunnerFile.py

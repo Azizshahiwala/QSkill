@@ -1,13 +1,13 @@
 import os,dotenv,re
 from word2number import w2n 
 import time
-from multiprocessing import Process
-from threading import Thread
+from multiprocessing import Process,freeze_support
 import keyboard
 import pyttsx3 
 import requests
 import speech_recognition as sr
 from datetime import datetime,timedelta 
+
 class EnvNotFoundError(Exception):
     def __init__(self,error=".env file for keys not found.") -> None:
         super().__init__(error)
@@ -53,16 +53,7 @@ class VoiceAssistant:
                 print("An env file has been created. Make sure to set configurations.")
         except MicrophoneNotFoundError:
             pass
-
-    def keywordPressed(self):
-        if keyboard.is_pressed('m'):
-                print("-------")
-                print("To change microphone, input device_index")
-                device_index = int(input("device_index="))
-                if assistant.mic_dict[device_index]:
-                    print(f"Switching to {assistant.mic_dict[device_index]}")
-                    print("-------")
-                    sr.Microphone(device_index=device_index)
+                
     def processToNumber(self,captured_speech:str):
         try:
             processed_num = 0
@@ -110,22 +101,19 @@ class VoiceAssistant:
         response = requests.get(call_url)
         data = response.json()
 
-        article = data['articles'][0]
-
-        source = article['source']['name']
-        author = article['author']
-        title = article['title']
-        description = article['description']
-        publishedAt = article['publishedAt']
-        content = article['content']
-
-        self.speakMessage(f"Source: {source}"
-                          f"Title: {title}"
-                          f"Author: {author}"
-                          f"Published at: {publishedAt}"
-                          f"Description: {description}"
-                          f"Content: {content}")
+        news_to_read=3
+        self.speakMessage(f"I will read {news_to_read} headlines.")
         
+        for index in range(news_to_read):
+            self.speakMessage(f"Speaking headline {index+1}")
+            article = data['articles'][index]
+            source = article['source']['name']
+            author = article['author']
+            title = article['title']
+            description = article['description']
+            publishedAt = article['publishedAt']
+            self.speakMessage(f"{source}, Title: {title}, Author: {author}.")
+            self.speakMessage(f"Description: {description}. Published at: {publishedAt}")
 
     def readWeather(self,city="Ahmedabad"):
         call_url=rf"{self.APIS['WEATHER_API_URL']}/forecast.json?key={self.APIS['WEATHER_API']}&q={city}&days=1&aqi=yes&alerts=yes"
@@ -147,17 +135,14 @@ class VoiceAssistant:
         rain_chance= day['daily_chance_of_rain']
 
         alerts= data['alerts']['alert']
-        print("alerts:",alerts)
+        print("Alerts for weather:",alerts)
 
         self.speakMessage(
-    f"Weather in {curr_city}, {country}. "
-    f"{atmosphere}, {temperature} degrees. "
-    f"Feels like {feels_like}. "
-    f"Humidity {humidity} percent. "
-    f"Chance of rain: {rain_chance} percent."
-    f"Temperature ranges from: {min_temp} to {max_temp}."
-    f"Wind kilometer per hour: {wind_kph}"
-    f"UV index: {uv_index}")
+    f"""Weather in {curr_city}, {country}. {atmosphere}, {temperature} degrees. 
+    This feels like {feels_like} where humidity is {humidity} percent. Chances of rain is {rain_chance} percent.
+    Your area's temperature ranges from: {min_temp} to {max_temp}, winds reaching {wind_kph} per hour. 
+    UV index: {uv_index}
+    """)
 
     def speakMessage(self, msg):
         try:
@@ -173,11 +158,14 @@ class VoiceAssistant:
             self.recognizer = sr.Recognizer()
             with sr.Microphone() as mic:
                 self.recognizer.adjust_for_ambient_noise(mic,duration=1)
-                audio = self.recognizer.listen(mic)
+                audio = self.recognizer.listen(mic,timeout=2)
                 text = self.recognizer.recognize_whisper(audio,model="small",language="english")
                 return text
         except sr.UnknownValueError:
             raise 
+        except sr.WaitTimeoutError:
+            return None
+        
     def processText(self,text:str):
         cleaned=""
         for letter in text:
@@ -216,7 +204,6 @@ class VoiceAssistant:
 
             reminder_process = Process(target=self.setReminder,kwargs={"task":taskname,"delay":seconds})
             reminder_process.start()
-            reminder_process.join()
 
         elif 'exit' in cleaned_message or 'quit' in cleaned_message:
             self.speakMessage("Exitting... Thankyou for using!")
@@ -230,23 +217,26 @@ if __name__ == "__main__":
     assistant.speakMessage("A) Set a reminder. B) Check current weather. C) Check current news.")
     rate = assistant.engine.getProperty('rate')
     
-    try:
-        keypress_thread = Thread(target=assistant.keywordPressed)
-        keypress_thread.start()
-    except IOError as e:
-        keypress_thread = Thread(target=assistant.keywordPressed)
-        keypress_thread.start()
-        keypress_thread.join()
     print("Speaking at rate: ",rate)
     assistant.engine.setProperty('rate',150)
     print("Listening...")
     
     while True:
         try:
-            captured_speech = assistant.listenMessage()
-            if not captured_speech or captured_speech == '':
-                continue
-            assistant.decideOperation(captured_speech)
+            if keyboard.is_pressed('m'):
+                print("-------")
+                print("To change microphone, input device_index")
+                device_index = int(input("device_index="))
+                if assistant.mic_dict[device_index]:
+                    print(f"Switching to {assistant.mic_dict[device_index]}")
+                    print("-------")
+                    sr.Microphone(device_index=device_index)
+                print("Listening...")
+            else:
+                captured_speech = assistant.listenMessage()
+                if not captured_speech or captured_speech == '':
+                    continue
+                assistant.decideOperation(captured_speech)
         except IOError as e:
             print(e)
             continue
