@@ -1,15 +1,17 @@
 import numpy as np
-from tkinter import Entry,Frame,Label,Button
+from tkinter import Entry,Frame,Label,Button,TclError
 from tkinter import E,W,N,S,RIGHT,LEFT,BOTTOM,END
 
 class Operations:
     def __init__(self):
-        self.root = None 
+        self.root=None 
         self.maincontent=None 
-        self.header = None
-        self.Frames = []
-        self.boundaries = dict([])
-        
+        self.header=None
+        self.Frames=[]
+        self.boundaries=dict([])
+        self.selectedFrame=None
+        self.InputFrame=None
+
     def focusIn(self,widget,placeholder):
         widget.delete(0,END) if widget.get().lower()==placeholder.lower() else False
             
@@ -18,28 +20,29 @@ class Operations:
         
     def displayOutput(self,Output):
         try:
-            
-            print("Output",Output)
+            element_pos=0
+            self.framePlacementPos=0
+            currentframepos=self.framePlacementPos
+            print("Output: ",Output)
             if hasattr(self, 'OutputArea') and self.OutputArea.winfo_exists():
                 for widget in self.OutputArea.winfo_children():
                     widget.destroy()
             
-
             for widget in self.OutputArea.winfo_children():
                 widget.destroy()
             
-            output_label = Label(self.OutputArea,text="Output:",background="green",font=self.matrix_value_font)
-            output_label.grid(row=0,column=0,sticky=W)
+            output_label = Label(self.OutputArea,text="Output",background="green",font=self.matrix_value_font)
+            output_label.grid(row=element_pos+2,column=0,sticky="")
 
             if np.ndim(Output) == 0:
                 Label(self.OutputArea,text=str(round(float(Output),4)),
-                background="green",font=self.matrix_value_font).grid(row=1,column=0,sticky=W)
+                background="green",font=self.matrix_value_font).grid(row=element_pos+3,column=1,sticky=W)
             else:
                 for x,row in enumerate(Output):
                     for y,col in enumerate(row):
-                        Label(self.OutputArea,text=f"{col} ",padx=1,pady=1,background="green",font=self.matrix_value_font).grid(row=x+1,column=y+1)
+                        Label(self.OutputArea,text=f"{col} ",padx=1,pady=1,background="green",font=self.matrix_value_font).grid(row=x+element_pos+3,column=y+1)
                     
-            self.OutputArea.grid(row=6,column=1,sticky="")
+            self.OutputArea.grid(row=currentframepos+1,column=2,sticky="")
         except Exception as e:
             print(e)
             raise 
@@ -101,80 +104,88 @@ class Operations:
             raise
             
         
-    def createElementInputField(self,frame,operation):
-        self.matrixA=[]
-        self.matrixB=[]
+    def createElementInputField(self,operation):
+        try:
+            self.framePlacementPos=0
+            currentframepos=self.framePlacementPos
 
-        if hasattr(self, 'Generated') and self.Generated.winfo_exists():
-            self.Generated.destroy()
-        #This frame is used to contain only generated fields.
-        self.Generated = Frame(frame,background="green")
+            self.matrixA=[]
+            self.matrixB=[]
+            print("Creating input fields..")
+            if not self.InputFrame:
+                return 
+            
+            if hasattr(self,'InputFrame') and self.InputFrame.winfo_children():
+                for widget in self.InputFrame.winfo_children():
+                    widget.destroy()
+            
+            final_row = 0
+            total_cols= 0
+            #A full square is made by r1 * c2
+            #This if statement will check if operation requires two matrix, else one matrix.
+            
+            if operation.lower() in ["addition", "subtraction", "multiplication"]:
+                r1, c1 = self.boundaries['row1'], self.boundaries['col1'] 
+                r2, c2 = self.boundaries['row2'], self.boundaries['col2']
+
+                space = c1 + 1
+                Label(self.InputFrame, text="Matrix A", font=self.text_font, background="green").grid(row=0, column=1, columnspan=c1, pady=(0,5), sticky="")
+                Label(self.InputFrame, text="Matrix B", font=self.text_font, background="green").grid(row=0, column=space+1, columnspan=c2, pady=(0,5), sticky="")
+
+                for r in range(r1):
+                    row_entry = []
+                    for c in range(c1):
+                        entry = Entry(self.InputFrame,font=self.matrix_value_font)
+                        entry.grid(row=r+1,column=c+1,padx=3, pady=3)
+                        row_entry.append(entry)
+                    self.matrixA.append(row_entry)
+
+                for r in range(r2):
+                    row_entry = []
+                    for c in range(c2):
+                        entry = Entry(self.InputFrame,font=self.matrix_value_font)
+                        entry.grid(row=r+1,column=space+c+1,padx=3, pady=3)
+                        row_entry.append(entry)
+                    self.matrixB.append(row_entry)
+                
+                for c in range(c1 + 2 + c2):
+                    self.InputFrame.columnconfigure(c, uniform="matrix", weight=1)
+                
+                final_row = max(r2,r1)+2
+                total_cols = c1 + 2 + c2
+
+            else:
+                r, c = self.boundaries['row'], self.boundaries['col']
+                
+                Label(self.InputFrame, text="Matrix",font=self.text_font,background="green").grid(row=0, column=1, columnspan=c, sticky="")
+                for x in range(r):
+                    row_entry = []
+                    for y in range(c):
+                        entry = Entry(self.InputFrame,font=self.matrix_value_font)
+                        entry.grid(row=x+1,column=y+1,padx=3, pady=3)
+                        row_entry.append(entry)
+                        
+                    self.matrixA.append(row_entry)
+
+                for c in range(c + 2):
+                    self.InputFrame.columnconfigure(c, uniform="matrix", weight=1)
+
+                final_row = r+1 
+                total_cols = c + 2
+
+            Button(self.InputFrame, text="Calculate",
+            command=lambda: self.calculate(operation)).grid(
+            row=final_row+2, column=0, columnspan=total_cols, pady=5, sticky="")
+            
+            self.InputFrame.grid(row=currentframepos, column=2, pady=10, sticky="")
         
-        for widget in frame.winfo_children():
-            info = widget.grid_info()
-            
-            if info and int(info['row']) >= 3:
-                widget.destroy()
-        
-        final_row = 0
-        total_cols= 0
-        two_matrix_ops = ["addition", "subtraction", "multiplication"]
-        #A full square is made by r1 * c2
-        #This if statement will check if operation requires two matrix, else one matrix.
-        
-        if operation.lower() in two_matrix_ops:
-            r1, c1 = self.boundaries['row1'], self.boundaries['col1'] 
-            r2, c2 = self.boundaries['row2'], self.boundaries['col2']
-
-            for r in range(r1):
-                row_entry = []
-                for c in range(c1):
-                    entry = Entry(self.Generated,font=self.matrix_value_font)
-                    entry.grid(row=r+3,column=c,padx=1, pady=1)
-                    row_entry.append(entry)
-                self.matrixA.append(row_entry)
-
-            space = c1+1
-            
-            for r in range(r2):
-                row_entry = []
-                for c in range(c2):
-                    entry = Entry(self.Generated,font=self.matrix_value_font)
-                    entry.grid(row=r+3,column=space+c,padx=1, pady=1)
-                    row_entry.append(entry)
-                self.matrixB.append(row_entry)
-            
-            for c in range(c1 + 1 + c2):
-                self.Generated.columnconfigure(c, uniform="matrix", weight=1)
-            
-            final_row = max(r2,r1)+3
-            total_cols = c1
-
-        else:
-            r, c = self.boundaries['row'], self.boundaries['col']
-            
-            Label(self.Generated, text="Matrix",font=self.text_font,background="green").grid(row=1, column=0, columnspan=c,sticky="")
-            for x in range(r):
-                row_entry = []
-                for y in range(c):
-                    entry = Entry(self.Generated)
-                    entry.grid(row=x+3,column=y,padx=1, pady=1)
-                    row_entry.append(entry)
-                    
-                self.matrixA.append(row_entry)
-
-            for c in range(c + 1):
-                self.Generated.columnconfigure(c, uniform="matrix", weight=1)
-
-            final_row = r+2 
-            total_cols = c
-
-        Button(self.Generated, text="Calculate",
-           command=lambda: self.calculate(operation)).grid(
-           row=final_row+2, column=0, columnspan=total_cols, pady=5, sticky="")
-        
-        self.Generated.grid(row=10, column=0, columnspan=6, pady=10, sticky="w")
-    def ProcessRowCol(self,operation,frame,**boundaries):
+        except TclError as e:
+            print(e)
+            raise
+        except Exception as e:
+            print(e)
+            raise
+    def ProcessRowCol(self,operation,**boundaries):
         """
         This function processes the input and checks if row and column input is correct or not.
         """
@@ -202,73 +213,83 @@ class Operations:
             iscorrect = (self.boundaries['row']>0 and self.boundaries['col']>0)
 
         if iscorrect:
-            self.dynamic_frame = frame 
-            self.createElementInputField(self.dynamic_frame,operation)
+            self.createElementInputField(operation)
         else:
             return
+        
     def setupTwoDimentionInputs(self,frame,operation):
-        head_label = Label(frame,text=f"Enter two matrix's max row and column for {operation}",background="green",font=self.text_font)
-        head_label.grid(row=0,column=0,columnspan=6,sticky="")
-        Label(frame, text="Matrix A", background="green",font=self.text_font).grid(row=1, column=0, columnspan=2,sticky="")
-        Label(frame, text="R1:", background="green",font=self.text_font).grid(row=2, column=0, sticky=E)
-        row1 = Entry(frame)
-        row1.grid(row=2,column=1,sticky=E)
+        self.selectedFrame = frame
+        label_pos=0
+        head_label = Label(self.selectedFrame,text=f"Enter two matrix's max row and column for {operation}",background="green",font=self.text_font)
+        head_label.grid(row=label_pos+1,column=0,columnspan=6,sticky="")
 
-        Label(frame, text="C1:", background="green",font=self.text_font).grid(row=2, column=2, sticky=E)
-        col1 = Entry(frame)
-        col1.grid(row=2,column=3,sticky=E)
+        Label(self.selectedFrame,text="Matrix A",background="green",font=self.text_font).grid(row=label_pos+2,column=0,columnspan=2,sticky="")
+        Label(self.selectedFrame,text="R1:",background="green",font=self.text_font).grid(row=label_pos+3,column=0,sticky="e")
+        row1=Entry(self.selectedFrame)
+        row1.grid(row=label_pos+3,column=1, padx=2, pady=2)
 
-        Label(frame, text="Matrix B", background="green",font=self.text_font).grid(row=1, column=4, columnspan=2,sticky="")
-        Label(frame, text="R2:", background="green",font=self.text_font).grid(row=2, column=4, sticky=E)
-        row2 = Entry(frame)
-        row2.grid(row=2,column=5,sticky=E)
+        Label(self.selectedFrame,text="C1:",background="green",font=self.text_font).grid(row=label_pos+4, column=0, sticky="e")
+        col1=Entry(self.selectedFrame)
+        col1.grid(row=label_pos+4,column=1, padx=2, pady=2)
 
-        Label(frame, text="C2:", background="green",font=self.text_font).grid(row=2, column=6, sticky=E)
-        col2 = Entry(frame)
-        col2.grid(row=2,column=7,sticky=E)
+        Label(self.selectedFrame, text="Matrix B",background="green",font=self.text_font).grid(row=label_pos+2, column=4, columnspan=2,sticky="")
+        Label(self.selectedFrame, text="R2:",background="green",font=self.text_font).grid(row=label_pos+3, column=4, sticky="e")
+        row2 = Entry(self.selectedFrame)
+        row2.grid(row=label_pos+3,column=5, padx=2, pady=2)
 
-        next_btn = Button(frame,text="Next",width=3,height=1,command=lambda: self.ProcessRowCol(operation,frame,boundaries={"row1":row1.get(),"col1":col1.get(),"row2":row2.get(),"col2":col2.get()}))
-        next_btn.grid(row=4,column=0,columnspan=5,pady=5,sticky="")
+        Label(self.selectedFrame,text="C2:",background="green",font=self.text_font).grid(row=label_pos+4, column=4, sticky="e")
+        col2 = Entry(self.selectedFrame)
+        col2.grid(row=label_pos+4,column=5, padx=2, pady=2)
+
+        next_btn = Button(self.selectedFrame,text="Next",width=6,height=1,command=lambda: self.ProcessRowCol(operation,boundaries={"row1":row1.get(),"col1":col1.get(),"row2":row2.get(),"col2":col2.get()}))
+        next_btn.grid(row=label_pos+5,column=0,columnspan=6,pady=10,sticky="")
     
     def setupOneDimentionInput(self,frame,operation):
-        head_label = Label(frame,text=f"Enter Matrix's max row and col for {operation}",background="green",font=self.text_font)
-        head_label.grid(row=0,column=0,columnspan=2,sticky="")
+        self.selectedFrame = frame
+        label_pos=0
+        head_label = Label(self.selectedFrame,text=f"Enter Matrix's max row and col for {operation}",background="green",font=self.text_font)
+        head_label.grid(row=label_pos+1,column=0,columnspan=2,sticky="")
 
-        row = Entry(frame)
-        col = Entry(frame)
+        Label(self.selectedFrame,text="Rows:", background="green",font=self.text_font).grid(row=label_pos+2, column=0, sticky="e")
+        row = Entry(self.selectedFrame)
+        row.grid(row=label_pos+2,column=1, padx=2, pady=2)
 
-        row.grid(row=1,column=0,columnspan=1,sticky=W)
-        col.grid(row=1,column=1,columnspan=1,sticky=W)
+        Label(self.selectedFrame, text="Columns:", background="green",font=self.text_font).grid(row=label_pos+3, column=0, sticky="e")
+        col = Entry(self.selectedFrame)
+        col.grid(row=label_pos+3,column=1, padx=2, pady=2)
 
-        next_btn = Button(frame,text="Next",width=3,height=1,command=lambda: self.ProcessRowCol(operation,frame,boundaries={"row":row.get(),"col":col.get()}))
-        next_btn.grid(row=2,column=0,columnspan=2,pady=5,sticky="")
+        next_btn = Button(self.selectedFrame,text="Next",width=6,height=1,command=lambda: self.ProcessRowCol(operation,boundaries={"row":row.get(),"col":col.get()}))
+        next_btn.grid(row=label_pos+4,column=0,columnspan=2,pady=10,sticky="")
 
         row.insert(0,"Enter max row")
         col.insert(0,"Enter max col")
         row.bind("<FocusIn>",lambda event :self.focusIn(row,"Enter max row"))
-        col.bind("<FocusIn>",lambda event :self.focusIn(col,"Enter max column"))
+        col.bind("<FocusIn>",lambda event :self.focusIn(col,"Enter max col"))
         row.bind("<FocusOut>",lambda event :self.focusOut(row,"Enter max row"))
-        col.bind("<FocusOut>",lambda event :self.focusOut(col,"Enter max column"))
+        col.bind("<FocusOut>",lambda event :self.focusOut(col,"Enter max col"))
         
-    def setRoot(self,root,maincontent,header,matrix_value_font,text_font):
+    def setRoot(self,root,maincontent,header,matrix_value_font,text_font,framePlacementPos):
+        self.framePlacementPos = framePlacementPos
         self.root = root 
         self.maincontent=maincontent
         self.header = header
         self.matrix_value_font = matrix_value_font
         self.text_font = text_font
-
-        self.AdditionFrame = Frame(maincontent,background="green",)
-        self.SubtractionFrame = Frame(maincontent,background="green")
-        self.MultiplicationFrame = Frame(maincontent,background="green")
-        self.DeterminantFrame = Frame(maincontent,background="green")
-        self.TransposeFrame = Frame(maincontent,background="green")
-        self.OutputArea = Frame(maincontent, background="green")
         
+        self.AdditionFrame = Frame(self.maincontent,background="green")
+        self.SubtractionFrame = Frame(self.maincontent,background="green")
+        self.MultiplicationFrame = Frame(self.maincontent,background="green")
+        self.DeterminantFrame = Frame(self.maincontent,background="green")
+        self.TransposeFrame = Frame(self.maincontent,background="green")
+        self.OutputArea = Frame(self.maincontent, background="green")
+        self.InputFrame = Frame(self.maincontent, background="green")
+
         self.Frames = [self.AdditionFrame,
-                        self.SubtractionFrame,
-                        self.MultiplicationFrame,
-                        self.DeterminantFrame,
-                        self.TransposeFrame,
+                       self.SubtractionFrame,
+                       self.MultiplicationFrame,
+                       self.DeterminantFrame,
+                       self.TransposeFrame,
+                       self.InputFrame,
                         self.OutputArea]
         
     def clearUI(self):
@@ -277,22 +298,22 @@ class Operations:
 
     def showAdditionComponent(self):       
         self.setupTwoDimentionInputs(self.AdditionFrame,"Addition")
-        self.AdditionFrame.grid(row=2, column=1,padx=40,sticky="nw")
+        self.AdditionFrame.grid(row=self.framePlacementPos+3, column=0, padx=10, pady=10, sticky="nw")
         
     def showSubtractionComponent(self):    
         self.setupTwoDimentionInputs(self.SubtractionFrame,"Subtraction")
-        self.SubtractionFrame.grid(row=2, column=1,padx=40,sticky="nw")
+        self.SubtractionFrame.grid(row=self.framePlacementPos+3, column=0, padx=10, pady=10, sticky="nw")
         
     def showMultiplicationComponent(self):
         self.setupTwoDimentionInputs(self.MultiplicationFrame,"Multiplication")
-        self.MultiplicationFrame.grid(row=2, column=1,padx=40,sticky="nw")
+        self.MultiplicationFrame.grid(row=self.framePlacementPos+3, column=0, padx=10, pady=10, sticky="nw")
         
     def showDeterminantComponent(self):
         self.setupOneDimentionInput(self.DeterminantFrame,"Determinant")
-        self.DeterminantFrame.grid(row=2, column=1,padx=40,sticky="nw")
+        self.DeterminantFrame.grid(row=self.framePlacementPos+3, column=0, padx=10, pady=10, sticky="nw")
         
     def showTransposeComponent(self):
         self.setupOneDimentionInput(self.TransposeFrame,"Transpose")
-        self.TransposeFrame.grid(row=2, column=1,padx=40,sticky="nw")
+        self.TransposeFrame.grid(row=self.framePlacementPos+3, column=0, padx=10, pady=10, sticky="nw")
         
 operations = Operations()
