@@ -1,4 +1,8 @@
 SpeechRecognition[audio]
+SpeechRecognition[whisper-local]
+openai-whisper
 pyttsx3
 requests
-schedule
+dotenv
+keyboard
+word2number
