@@ -1,0 +1,66 @@
+.core{
+    display: grid;
+    grid-template-columns: 1fr;
+    background-color: #FDED2A;
+    min-height: 100vh;
+    align-items: stretch;
+}
+.core .core-heading{
+    padding: 30px 20px;      
+    font-size: larger;
+    font-weight: bolder;
+    text-align: center;
+    color:#700CBC;
+    font-family: Georgia, serif;
+}
+.core-heading #appname{
+font-size: 60px;
+}
+.core-heading #welcometext{
+font-size: 40px;
+}
+.core .core-body{
+    padding: 30px 20px;      
+    font-size: 2em;
+    font-width: 40px;
+    font-weight: 900;
+    font-family: Verdana, sans-serif;
+    text-align: center;
+    color:#343009;
+    box-sizing: border-box;
+    width: 100%;
+}
+.core-body #submitbtn{
+    min-height: 50px;
+    min-width: 70px;
+}
+.core-body #inputbox{
+    min-height: 50px;
+    min-width: 80px;
+}
+.core-body span{
+    padding-top: 20px;
+    font-size: 20px;
+}
+.core .core-result{
+    padding: 30px 20px;      
+    width: 100%;
+    font-size: 1em;
+    text-align: center;
+    font-family: Verdana, sans-serif;
+    color: #343009;
+    background-color: #E8D4F7;
+}
+.core-result span #maintext{
+    color:rgb(100, 98, 220);
+}
+.core .core-error{
+    padding: 30px 20px;      
+    font-size: 1.2em;
+    font-family: Verdana, sans-serif;
+    text-align: center;
+    color:rgb(236, 67, 67);
+    width: 100%;
+    background-color: #E8D4F7;
+    font-weight: 900;
+}
