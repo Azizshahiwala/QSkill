@@ -17,7 +17,6 @@ class MicrophoneNotFoundError(Exception):
 class VoiceAssistant:
     def __init__(self) -> None:
         self.localInfo = locale.getlocale()[0]
-        print(self.localInfo)
         self.APIS={"WEATHER_API_URL":"",
                    "WEATHER_API":"",
                    "NEWS_API_URL":"",
@@ -36,7 +35,7 @@ class VoiceAssistant:
                 keys = self.APIS.keys()
                 for key in keys:
                     self.APIS[key]=os.getenv(key)
-                print("Dictionary:",self.APIS)
+                
 
             if not sr.Microphone.list_microphone_names():
                 raise MicrophoneNotFoundError
@@ -223,16 +222,12 @@ class VoiceAssistant:
     
     def decideOperation(self,text):
         cleaned_message = self.processText(text)
-
-        if 'weather' in cleaned_message:
-            current_country = self.localInfo.split('_')
-            current_country = current_country[-1]
+        current_country = self.localInfo.split('_')
+        current_country = current_country[-1]
+        if 'weather' in cleaned_message:          
             self.speakMessage("Please wait, let me fetch weather data.")
             self.readWeather(country=current_country)
-        elif 'news' in cleaned_message:
-            current_country = self.localInfo.split('_')
-            current_country = current_country[-1]
-
+        elif 'news' in cleaned_message:       
             self.speakMessage("Please wait, let me fetch news data.")
             self.readNews(parameter=current_country)
         elif 'reminder' in cleaned_message:
@@ -269,8 +264,6 @@ if __name__ == "__main__":
     assistant.speakMessage("Welcome to Voice Assistant. What would you like to do?")
     assistant.speakMessage("A) Set a reminder. B) Check current weather. C) Check current news.")
     rate = assistant.engine.getProperty('rate')
-    
-    print("Speaking at rate: ",rate)
     assistant.engine.setProperty('rate',150)
     print("Listening...")
     
