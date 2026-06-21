@@ -1,4 +1,4 @@
-import os,dotenv,re
+import os,dotenv,re,locale
 from word2number import w2n
 from multiprocessing import Process
 import keyboard
@@ -16,6 +16,8 @@ class MicrophoneNotFoundError(Exception):
 
 class VoiceAssistant:
     def __init__(self) -> None:
+        self.localInfo = locale.getlocale()[0]
+        print(self.localInfo)
         self.APIS={"WEATHER_API_URL":"",
                    "WEATHER_API":"",
                    "NEWS_API_URL":"",
@@ -96,52 +98,99 @@ class VoiceAssistant:
         '''
         This function will read at least 1 article.
         '''
-        call_url = f"{self.APIS['NEWS_API_URL']}?q={parameter}&from={startDate}&sortBy=publishedAt&apiKey={self.APIS['NEWS_API']}"
-        response = requests.get(call_url)
-        data = response.json()
+        try:
+            call_url = f"{self.APIS['NEWS_API_URL']}?q={parameter}&from={startDate}&sortBy=publishedAt&apiKey={self.APIS['NEWS_API']}"
+            response = requests.get(call_url)
+            data = response.json()
 
-        news_to_read=3
-        self.speakMessage(f"I will read {news_to_read} headlines.")
-        
-        for index in range(news_to_read):
-            self.speakMessage(f"Speaking headline {index+1}")
-            article = data['articles'][index]
-            source = article['source']['name']
-            author = article['author']
-            title = article['title']
-            description = article['description']
-            publishedAt = article['publishedAt']
-            self.speakMessage(f"{source}, Title: {title}, Author: {author}.")
-            self.speakMessage(f"Description: {description}. Published at: {publishedAt}")
+            news_to_read=3
+            self.speakMessage(f"I will read {news_to_read} headlines.")
+            
+            for index in range(news_to_read):
+                self.speakMessage(f"Speaking headline {index+1}")
+                article = data['articles'][index]
+                source = article['source']['name']
+                author = article['author']
+                title = article['title']
+                description = article['description']
+                publishedAt = article['publishedAt']
+                self.speakMessage(f"{source}, Title: {title}, Author: {author}.")
+                self.speakMessage(f"Description: {description}. Published at: {publishedAt}")
+        except Exception:
+            call_url = f"{self.APIS['NEWS_API_URL']}?q={parameter}&from={startDate}&sortBy=publishedAt&apiKey={self.APIS['NEWS_API']}"
+            response = requests.get(call_url)
+            data = response.json()
 
-    def readWeather(self,city="Ahmedabad"):
-        call_url=rf"{self.APIS['WEATHER_API_URL']}/forecast.json?key={self.APIS['WEATHER_API']}&q={city}&days=1&aqi=yes&alerts=yes"
-        response= requests.get(call_url)
-        data = response.json()
-        curr_city = data['location']['name']
-        country = data['location']['country']
-        
-        temperature= data['current']['temp_c']
-        atmosphere= data['current']['condition']['text']
-        feels_like= data['current']['feelslike_c']
-        humidity= data['current']['humidity']
-        wind_kph= data['current']['wind_kph']
-        uv_index= data['current']['uv']
-        
-        day = data['forecast']['forecastday'][0]['day']
-        max_temp= day['maxtemp_c']
-        min_temp= day['mintemp_c']
-        rain_chance= day['daily_chance_of_rain']
+            news_to_read=1
+            self.speakMessage(f"I will read {news_to_read} headline/s")
+            
+            for index in range(news_to_read):
+                self.speakMessage(f"Speaking headline {index+1}")
+                article = data['articles'][index]
+                source = article['source']['name']
+                author = article['author']
+                title = article['title']
+                description = article['description']
+                publishedAt = article['publishedAt']
+                self.speakMessage(f"{source}, Title: {title}, Author: {author}.")
+                self.speakMessage(f"Description: {description}. Published at: {publishedAt}")
+            raise
 
-        alerts= data['alerts']['alert']
-        print("Alerts for weather:",alerts)
+    def readWeather(self,country="India"):
+        try:
+            call_url=rf"{self.APIS['WEATHER_API_URL']}/forecast.json?key={self.APIS['WEATHER_API']}&q={country}&days=1&aqi=yes&alerts=yes"
+            response= requests.get(call_url)
+            data = response.json()
+            curr_city = data['location']['name']
+            country = data['location']['country']
+            
+            temperature= data['current']['temp_c']
+            atmosphere= data['current']['condition']['text']
+            feels_like= data['current']['feelslike_c']
+            humidity= data['current']['humidity']
+            wind_kph= data['current']['wind_kph']
+            
+            day = data['forecast']['forecastday'][0]['day']
+            max_temp= day['maxtemp_c']
+            min_temp= day['mintemp_c']
+            rain_chance= day['daily_chance_of_rain']
 
-        self.speakMessage(
-    f"""Weather in {curr_city}, {country}. {atmosphere}, {temperature} degrees. 
-    This feels like {feels_like} where humidity is {humidity} percent. Chances of rain is {rain_chance} percent.
-    Your area's temperature ranges from: {min_temp} to {max_temp}, winds reaching {wind_kph} per hour. 
-    UV index: {uv_index}
-    """)
+            alerts= data['alerts']['alert']
+            print("Alerts for weather:",alerts)
+
+            self.speakMessage(
+        f"""Weather in {curr_city}, {country}. {atmosphere}, {temperature} degrees. 
+        This feels like {feels_like} where humidity is {humidity} percent. Chances of rain is {rain_chance} percent.
+        Your area's temperature ranges from: {min_temp} to {max_temp}, winds reaching {wind_kph} per hour.
+        """)
+        except Exception:
+            call_url=rf"{self.APIS['WEATHER_API_URL']}/forecast.json?key={self.APIS['WEATHER_API']}&q=India&days=1&aqi=yes&alerts=yes"
+            response= requests.get(call_url)
+            data = response.json()
+            curr_city = data['location']['name']
+            country = data['location']['country']
+            
+            temperature= data['current']['temp_c']
+            atmosphere= data['current']['condition']['text']
+            feels_like= data['current']['feelslike_c']
+            humidity= data['current']['humidity']
+            wind_kph= data['current']['wind_kph']
+            
+            day = data['forecast']['forecastday'][0]['day']
+            max_temp= day['maxtemp_c']
+            min_temp= day['mintemp_c']
+            rain_chance= day['daily_chance_of_rain']
+
+            alerts= data['alerts']['alert']
+            print("Alerts for weather:",alerts)
+
+            self.speakMessage(
+            f"""Weather in {curr_city}, {country}. {atmosphere}, {temperature} degrees. 
+            This feels like {feels_like} where humidity is {humidity} percent. Chances of rain is {rain_chance} percent.
+            Your area's temperature ranges from: {min_temp} to {max_temp}, winds reaching {wind_kph} per hour.
+            """)
+            raise
+            
 
     def speakMessage(self, msg):
         try:
@@ -176,11 +225,16 @@ class VoiceAssistant:
         cleaned_message = self.processText(text)
 
         if 'weather' in cleaned_message:
+            current_country = self.localInfo.split('_')
+            current_country = current_country[-1]
             self.speakMessage("Please wait, let me fetch weather data.")
-            self.readWeather()
+            self.readWeather(country=current_country)
         elif 'news' in cleaned_message:
+            current_country = self.localInfo.split('_')
+            current_country = current_country[-1]
+
             self.speakMessage("Please wait, let me fetch news data.")
-            self.readNews()
+            self.readNews(parameter=current_country)
         elif 'reminder' in cleaned_message:
             seconds=0
             count=0
