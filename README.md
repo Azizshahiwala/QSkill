@@ -2,6 +2,9 @@
 
 One-month internship at QSkill. This repository contains 3 completed mini-projects, each in its own folder with independent setup and dependencies.
 
+You can also check its independent branch. 
+Master branch consists of all 3 task completed.
+
 ## Table of Contents
 
 - [Projects](#projects)
@@ -36,7 +39,7 @@ A desktop GUI application for performing matrix operations, built with Tkinter a
 cd Matrix_operation_tool
 python -m venv venv
 venv\Scripts\activate          # Windows
-pip install numpy
+pip install -r requirements.txt
 python MatrixOperationsTool.py
 ```
 
@@ -72,7 +75,7 @@ A Flask web application that classifies user-submitted text as Positive, Negativ
 cd Sentiment_analysis
 python -m venv venv
 venv\Scripts\activate           # Windows
-pip install flask textblob python-dotenv
+pip install -r requirements.txt
 python -m textblob.download_corpora
 python SentimentAnalysis.py
 ```
@@ -116,7 +119,7 @@ A voice-controlled assistant that handles reminders, weather lookups, and news h
 cd VoiceActivatedPersonalAssistant
 python -m venv venv
 venv\Scripts\activate           # Windows
-pip install SpeechRecognition[audio] pyttsx3 requests python-dotenv word2number openai-whisper keyboard
+pip install -r requirements.txt
 python VoiceAssistant.py
 ```
 
@@ -192,5 +195,5 @@ Navigate into the relevant project folder and follow its individual setup instru
 ## Author
 
 **Aziz Shahiwala**
-Final-year iMScIT, GLS University
+Fourth year, Semister 7, GLS University.
 [GitHub](https://github.com/Azizshahiwala)
