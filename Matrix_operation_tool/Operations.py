@@ -42,6 +42,8 @@ class Operations:
                     for y,col in enumerate(row):
                         Label(self.OutputArea,text=f"{col} ",padx=1,pady=1,background="green",font=self.matrix_value_font).grid(row=x+element_pos+3,column=y+1,sticky='nw')
             
+            if y==0:
+                y=1
             output_label.grid(columnspan=y)
             self.OutputArea.grid(row=currentframepos+1,column=1,sticky="nw")
         except Exception as e:
@@ -126,7 +128,7 @@ class Operations:
                 for r in range(r1):
                     row_entry=[]
                     for c in range(c1):
-                        if r1>3:
+                        if r1>3 or c1>3:
                             entry=Entry(self.InputFrame,font=self.matrix_value_font,width=2)
                             entry.grid(row=r+1,column=c,sticky="w")
                         else:
@@ -140,7 +142,7 @@ class Operations:
                 for r in range(r2):
                     row_entry=[]
                     for c in range(c2):
-                        if r2>3:
+                        if r2>3 or c2>3:
                             entry=Entry(self.InputFrame,font=self.matrix_value_font,width=2)
                             entry.grid(row=r+new_block_pos+1,column=c,sticky="w")
                         else:
@@ -159,10 +161,13 @@ class Operations:
                 for x in range(r):
                     row_entry=[]
                     for y in range(c):
-                        entry=Entry(self.InputFrame,font=self.matrix_value_font)
-                        entry.grid(row=x+1,column=y,padx=1, pady=1,sticky="w")
-                        row_entry.append(entry)
-                        
+                        if x>3 or y>3:
+                            entry=Entry(self.InputFrame,font=self.matrix_value_font,width=2)
+                            entry.grid(row=x+1,column=y,sticky="w")
+                        else:
+                            entry=Entry(self.InputFrame,font=self.matrix_value_font)
+                            entry.grid(row=x+1,column=y,padx=1, pady=1,sticky="w")
+                        row_entry.append(entry) 
                     self.matrixA.append(row_entry)
 
                 for c in range(c+2):
