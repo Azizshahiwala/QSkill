@@ -1,6 +1,6 @@
 import numpy as np
 from tkinter import Entry,Frame,Label,Button,TclError
-from tkinter import E,W,N,S,RIGHT,LEFT,BOTTOM,END
+from tkinter import W,END
 
 class Operations:
     def __init__(self):
