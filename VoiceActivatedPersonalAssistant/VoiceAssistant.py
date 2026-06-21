@@ -1,6 +1,6 @@
 import os,dotenv,re
 from word2number import w2n
-from multiprocessing import Process,freeze_support
+from multiprocessing import Process
 import keyboard
 import pyttsx3 
 import requests
