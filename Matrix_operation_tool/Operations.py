@@ -159,8 +159,12 @@ class Operations:
                 for x in range(r):
                     row_entry=[]
                     for y in range(c):
-                        entry=Entry(self.InputFrame,font=self.matrix_value_font)
-                        entry.grid(row=x+1,column=y,padx=1, pady=1,sticky="w")
+                        if x>3:
+                            entry=Entry(self.InputFrame,font=self.matrix_value_font,width=2)
+                            entry.grid(row=x+1,column=y,sticky="w")
+                        else:
+                            entry=Entry(self.InputFrame,font=self.matrix_value_font)
+                            entry.grid(row=x+1,column=y,padx=1, pady=1,sticky="w")
                         row_entry.append(entry)
                         
                     self.matrixA.append(row_entry)
