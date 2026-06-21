@@ -20,6 +20,7 @@ class Operations:
         
     def displayOutput(self,Output):
         try:
+            y=0
             element_pos=0
             self.framePlacementPos=0
             currentframepos=self.framePlacementPos
@@ -31,17 +32,18 @@ class Operations:
                 widget.destroy()
             
             output_label = Label(self.OutputArea,text="Output",background="green",font=self.matrix_value_font)
-            output_label.grid(row=element_pos+2,column=0,sticky="")
+            output_label.grid(row=element_pos+2,column=0)
 
             if np.ndim(Output)==0:
                 Label(self.OutputArea,text=str(round(float(Output),4)),
-                background="green",font=self.matrix_value_font).grid(row=element_pos+3,column=1,sticky=W)
+                background="green",font=self.matrix_value_font).grid(row=element_pos+3,column=0,sticky='nw')
             else:
                 for x,row in enumerate(Output):
                     for y,col in enumerate(row):
-                        Label(self.OutputArea,text=f"{col} ",padx=1,pady=1,background="green",font=self.matrix_value_font).grid(row=x+element_pos+3,column=y+1)
-                    
-            self.OutputArea.grid(row=currentframepos+1,column=2,sticky="")
+                        Label(self.OutputArea,text=f"{col} ",padx=1,pady=1,background="green",font=self.matrix_value_font).grid(row=x+element_pos+3,column=y+1,sticky='nw')
+            
+            output_label.grid(columnspan=y)
+            self.OutputArea.grid(row=currentframepos+1,column=1,sticky="nw")
         except Exception as e:
             print(e)
             raise 
@@ -112,48 +114,53 @@ class Operations:
                 for widget in self.InputFrame.winfo_children():
                     widget.destroy()
             
-            final_row=0
             total_cols=0
-            
+            new_block_pos=0
+            r=0
             if operation.lower() in ["addition", "subtraction", "multiplication"]:
                 r1, c1 = self.boundaries['row1'], self.boundaries['col1'] 
                 r2, c2 = self.boundaries['row2'], self.boundaries['col2']
 
-                space=c1+1
-                Label(self.InputFrame, text="Matrix A", font=self.text_font, background="green").grid(row=0, column=1, columnspan=c1, pady=(0,5), sticky="")
-                Label(self.InputFrame, text="Matrix B", font=self.text_font, background="green").grid(row=0, column=space+1, columnspan=c2, pady=(0,5), sticky="")
-
+                Label(self.InputFrame, text="Matrix A", font=self.text_font, background="green").grid(row=0, column=1, columnspan=c1, pady=(0,5), sticky="w")
+                
                 for r in range(r1):
                     row_entry=[]
                     for c in range(c1):
-                        entry=Entry(self.InputFrame,font=self.matrix_value_font)
-                        entry.grid(row=r+1,column=c+1,padx=3, pady=3)
+                        if r1>3:
+                            entry=Entry(self.InputFrame,font=self.matrix_value_font,width=2)
+                            entry.grid(row=r+1,column=c,sticky="w")
+                        else:
+                            entry=Entry(self.InputFrame,font=self.matrix_value_font)
+                            entry.grid(row=r+1,column=c,padx=1, pady=1,sticky="w")
                         row_entry.append(entry)
                     self.matrixA.append(row_entry)
 
+                new_block_pos=r1+2
+                Label(self.InputFrame, text="Matrix B", font=self.text_font, background="green").grid(row=new_block_pos, column=1, columnspan=c2, pady=(0,5), sticky="w")                
                 for r in range(r2):
                     row_entry=[]
                     for c in range(c2):
-                        entry=Entry(self.InputFrame,font=self.matrix_value_font)
-                        entry.grid(row=r+1,column=space+c+1,padx=3, pady=3)
+                        if r2>3:
+                            entry=Entry(self.InputFrame,font=self.matrix_value_font,width=2)
+                            entry.grid(row=r+new_block_pos+1,column=c,sticky="w")
+                        else:
+                            entry=Entry(self.InputFrame,font=self.matrix_value_font)
+                            entry.grid(row=r+new_block_pos+1,column=c,padx=1, pady=1,sticky="w")
+                        
                         row_entry.append(entry)
                     self.matrixB.append(row_entry)
                 
-                for c in range(c1 + 2 + c2):
-                    self.InputFrame.columnconfigure(c, uniform="matrix", weight=1)
-                
-                final_row = max(r2,r1)+2
-                total_cols = c1 + 2 + c2
+                total_cols = c1 + c2
 
             else:
                 r,c = self.boundaries['row'], self.boundaries['col']
                 
-                Label(self.InputFrame, text="Matrix",font=self.text_font,background="green").grid(row=0, column=1, columnspan=c, sticky="")
+                Label(self.InputFrame, text="Matrix",font=self.text_font,background="green").grid(row=new_block_pos+r, column=0, columnspan=c, sticky="w")
                 for x in range(r):
                     row_entry=[]
                     for y in range(c):
                         entry=Entry(self.InputFrame,font=self.matrix_value_font)
-                        entry.grid(row=x+1,column=y+1,padx=3, pady=3)
+                        entry.grid(row=x+1,column=y,padx=1, pady=1,sticky="w")
                         row_entry.append(entry)
                         
                     self.matrixA.append(row_entry)
@@ -161,14 +168,13 @@ class Operations:
                 for c in range(c+2):
                     self.InputFrame.columnconfigure(c, uniform="matrix", weight=1)
 
-                final_row = r+1 
-                total_cols = c+2
+                total_cols = c
 
             Button(self.InputFrame, text="Calculate",
             command=lambda: self.calculate(operation)).grid(
-            row=final_row+2, column=0, columnspan=total_cols, pady=5, sticky="")
+            row=new_block_pos+r+2, column=0, columnspan=total_cols, pady=5, sticky="")
             
-            self.InputFrame.grid(row=currentframepos, column=2, pady=10, sticky="")
+            self.InputFrame.grid(row=currentframepos, column=1, pady=10, sticky="nw")
         
         except TclError as e:
             print(e)

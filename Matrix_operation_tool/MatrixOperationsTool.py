@@ -60,14 +60,12 @@ class MatrixOperationsTool():
         There will be two matrix inputs
         """
 
-        #Setup simple buttons and intro label
         label_pos=0
         self.framePlacementPos=0
         currentframepos=self.framePlacementPos
-        #New section for radio button
+        
         self.selectionFrame = Frame(self.maincontent,background="green")
-
-        #Heading
+        
         heading_1 = Label(self.selectionFrame,text="What operation you would like to perform?",background="green",font=self.text_font)
         heading_1.grid(row=label_pos+1,column=label_pos+3,padx=5)
 
@@ -91,7 +89,8 @@ class MatrixOperationsTool():
 
         self.selectionFrame.grid(row=currentframepos,column=0,padx=4)
         self.maincontent.columnconfigure(0,weight=0)
-        self.maincontent.columnconfigure(1,weight=1)
+        self.maincontent.columnconfigure(1,weight=0)
+        self.maincontent.columnconfigure(2,weight=0)
 
 if __name__ == "__main__":
     root = Tk()
