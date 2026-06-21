@@ -1,8 +1,0 @@
-SpeechRecognition[audio]
-SpeechRecognition[whisper-local]
-openai-whisper
-pyttsx3
-requests
-dotenv
-keyboard
-word2number

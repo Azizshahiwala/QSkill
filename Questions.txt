@@ -1,5 +1,0 @@
-Create a "Matrix Operations Tool" using Python and the NumPy library. The application should allow users to input matrices and perform operations like addition, subtraction, multiplication, transpose, and determinant calculation. Include an interactive interface to display results in a structured format.
-
-Develop a web application using Flask or Django that performs sentiment analysis on user entered text. The application should classify the text as positive, negative, or neutral using TextBlob and display polarity and subjectivity scores.
-
-Voice-Activated Personal Assistant: Build a personal assistant that performs tasks like setting reminders, checking the weather, and reading the news. Integrate with speech recognition and text-to-speech libraries to create an interactive, voice-activated experience.
