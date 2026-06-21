@@ -87,9 +87,9 @@ class MatrixOperationsTool():
         determinant_option =Radiobutton(self.selectionFrame,text="Determinant of matrix", variable=selected, value="Determinant",command=self.UIOption,background="green")
         determinant_option.grid(row=label_pos+6,column=label_pos+3,pady=2)
 
-        self.selectionFrame.grid(row=currentframepos,column=0,padx=4)
+        self.selectionFrame.grid(row=currentframepos,column=0,padx=4, sticky="nw")
         self.maincontent.columnconfigure(0,weight=0)
-        self.maincontent.columnconfigure(1,weight=0)
+        self.maincontent.columnconfigure(1,weight=1)
         self.maincontent.columnconfigure(2,weight=0)
 
 if __name__ == "__main__":
