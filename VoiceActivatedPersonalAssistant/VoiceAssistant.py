@@ -1,6 +1,6 @@
 import os,dotenv,re,locale
 from word2number import w2n
-from multiprocessing import Process
+from multiprocessing import Process,Value
 import keyboard
 import pyttsx3 
 import requests
@@ -16,6 +16,7 @@ class MicrophoneNotFoundError(Exception):
 
 class VoiceAssistant:
     def __init__(self) -> None:
+        self.ongoingReminder=Value('b',False)
         self.localInfo = locale.getlocale()[0]
         self.APIS={"WEATHER_API_URL":"",
                    "WEATHER_API":"",
@@ -36,7 +37,6 @@ class VoiceAssistant:
                 for key in keys:
                     self.APIS[key]=os.getenv(key)
                 
-
             if not sr.Microphone.list_microphone_names():
                 raise MicrophoneNotFoundError
             else:
@@ -64,14 +64,14 @@ class VoiceAssistant:
         except ValueError as e:
             processed_num = re.findall(r"\d+",captured_speech)
             if len(processed_num) > 0:
-                print("Processed: ",processed_num[0])
                 processed_num = float(processed_num[0])
             
             return processed_num
         except Exception as e:
             print(e)
     @staticmethod    
-    def setReminder(task,delay=60):
+    def setReminder(task,delay=60,ongoing={}):
+        ongoing.value = True
 
         import pyttsx3,time
         def speakMessage(msg):
@@ -80,6 +80,7 @@ class VoiceAssistant:
             while engine.isBusy():
                 engine.iterate()
             engine.endLoop()
+            return
 
         print("Task name:",task)
         engine = pyttsx3.init()
@@ -88,10 +89,13 @@ class VoiceAssistant:
         minute = delay/60
         print("delay in minutes:",minute)
         speakMessage(f"Reminder set for {task}! I will remind you in {minute} minutes.")
+        
         time.sleep(delay)
         speakMessage(f"Your timer for {minute} minutes ended!")
         print("Task completed.")
+        ongoing.value = False
         engine.stop()
+        return
          
     def readNews(self,parameter="India",startDate=datetime.strftime(datetime.now()- timedelta(days=1),'%Y-%m-%d')):
         '''
@@ -231,9 +235,14 @@ class VoiceAssistant:
             self.speakMessage("Please wait, let me fetch news data.")
             self.readNews(parameter=current_country)
         elif 'reminder' in cleaned_message:
+
+            if self.ongoingReminder.value:
+                print("An on going reminder is set. Make sure to let this reminder finish.")
+                print("----")
+                return
+            
             seconds=0
             count=0
-            
             self.speakMessage("Ok, Speak task name.")
             print("Say your task name...")
             taskname = self.listenMessage()
@@ -250,7 +259,7 @@ class VoiceAssistant:
                 seconds = 60
                 self.speakMessage("Could not understand minute count. timer will be set to 1 minute.")
 
-            reminder_process = Process(target=self.setReminder,kwargs={"task":taskname,"delay":seconds})
+            reminder_process = Process(target=self.setReminder,kwargs={"task":taskname,"delay":seconds,"ongoing":self.ongoingReminder})
             reminder_process.start()
 
         elif 'exit' in cleaned_message or 'quit' in cleaned_message:
@@ -269,6 +278,8 @@ if __name__ == "__main__":
     
     while True:
         try:
+            
+
             if keyboard.is_pressed('m'):
                 print("-------")
                 print("To change microphone, input device_index")
