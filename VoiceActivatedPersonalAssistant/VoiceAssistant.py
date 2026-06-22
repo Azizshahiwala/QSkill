@@ -56,6 +56,10 @@ class VoiceAssistant:
                 
     def processToNumber(self,captured_speech:str):
         try:
+            if not captured_speech:
+                print("No speech captured for number parsing.")
+                return 0
+            
             processed_num = 0
             cleaned = " ".join(self.processText(captured_speech))
             print("Data inputted:",cleaned)
@@ -65,15 +69,19 @@ class VoiceAssistant:
             processed_num = re.findall(r"\d+",captured_speech)
             if len(processed_num) > 0:
                 processed_num = float(processed_num[0])
-            
+            else:
+                processed_num=0
+            print("Processed:",processed_num)
             return processed_num
         except Exception as e:
             print(e)
+            return 0
+        
     @staticmethod    
     def setReminder(task,delay=60,ongoing={}):
+        import pyttsx3,time
         ongoing.value = True
 
-        import pyttsx3,time
         def speakMessage(msg):
             engine.say(msg)
             engine.startLoop(False)
@@ -99,7 +107,7 @@ class VoiceAssistant:
          
     def readNews(self,parameter="India",startDate=datetime.strftime(datetime.now()- timedelta(days=1),'%Y-%m-%d')):
         '''
-        This function will read at least 1 article.
+        This function will read at least 1 article. Max 3.
         '''
         try:
             call_url = f"{self.APIS['NEWS_API_URL']}?q={parameter}&from={startDate}&sortBy=publishedAt&apiKey={self.APIS['NEWS_API']}"
@@ -278,8 +286,6 @@ if __name__ == "__main__":
     
     while True:
         try:
-            
-
             if keyboard.is_pressed('m'):
                 print("-------")
                 print("To change microphone, input device_index")
