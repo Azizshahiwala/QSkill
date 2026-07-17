@@ -21,6 +21,9 @@ class SentimentAnalysis():
             with open(self.path,"w+") as file:
                 file.write(r"FLASK_API_KEY=")
                 print("An env file has been created. Make sure to set configurations.")
+            exit(0)
+        finally:
+            print("Process completed")
 
 app = Flask(__name__)
 sentimentAnalysis = SentimentAnalysis()
